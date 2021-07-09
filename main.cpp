@@ -1,9 +1,6 @@
 #include <iostream>
-#include "ISA.h"
+#include "simulator.hpp"
 int main() {
-    ISA test;
-    test.read();
-    //test.mem->print_all();
-    test.run();
+    run();
     return 0;
 }

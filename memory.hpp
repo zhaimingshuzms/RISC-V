@@ -10,8 +10,8 @@ const int SIZE=500001;
 class memory{
 public:
     UINT pos;
-    UCHAR *pool;
-    memory():pool(new UCHAR [SIZE]()),pos(0){
+    UCHAR pool[SIZE];
+    memory():pos(0){
 
     }
     void seek(UINT _pos){
@@ -33,5 +33,5 @@ public:
         for (UINT i=0; i<SIZE; ++i)
             if (pool[i]) std::cout<<i<<" "<<std::hex<<(UINT)pool[i]<<std::endl;
     }
-};
+}M;
 #endif //RISC_V_MEMORY_HPP
