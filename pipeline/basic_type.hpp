@@ -5,6 +5,7 @@
 #ifndef RISC_V_BASIC_TYPE_HPP
 #define RISC_V_BASIC_TYPE_HPP
 #include "../lib/sign.h"
+#include <climits>
 class command_base{
 public:
     enum type{
