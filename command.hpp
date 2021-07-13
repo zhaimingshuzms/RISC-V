@@ -20,9 +20,8 @@ struct Ucommand:command_base{
         //std::cout<<"U"<<std::endl;
         imm=getval(in,12,31)<<12;
     }
-    Ucommand(const command_base &u):command_base(u){
-    }
     void run(RSmessage &rs){
+        //std::cerr<<"Ucommand"<<imm<<std::endl;
         if (opcode==0b0110111) logic::lui(EX_to_rob_v,imm);
         else logic::auipc(EX_to_rob_v,rs.pc,imm);
     }
@@ -36,8 +35,6 @@ public:
             (getval(in,21,30)<<1)|
             extrabit(getval(in,31,31),20);
     }
-    Jcommand(const command_base &u):command_base(u){
-    }
     void run(RSmessage &rs){
         logic::jal(EX_to_rob_v,imm,rs.pc,EX_to_rob_pc);
     }
@@ -47,8 +44,6 @@ public:
     Icommand(const UINT &in):command_base(in){
         imm=getval(in,20,30)|
             extrabit(getval(in,31,31),11);
-    }
-    Icommand(const command_base &u):command_base(u){
     }
     void run(RSmessage &rs){
         if (opcode==0b1100111) logic::jalr(rs.V1,EX_to_rob_v,imm,rs.pc,EX_to_rob_pc);
@@ -61,6 +56,7 @@ public:
             else if (opcode2 == 0b101) logic::lhu(rs.V1, SLB_to_rob_v, imm);
         }
         else{
+            //std::cerr<<"Icommand"<<rs.V1<<" "<<imm<<std::endl;
             if (opcode2==0b000) logic::addi(rs.V1,EX_to_rob_v,imm);
             else if (opcode2==0b010) logic::slti(rs.V1,EX_to_rob_v,imm);
             else if (opcode2==0b011) logic::sltiu(rs.V1,EX_to_rob_v,imm);
@@ -84,15 +80,15 @@ public:
             (getval(in,25,30)<<5)|
             extrabit(getval(in,31,31),12);
     }
-    Bcommand(const command_base &u):command_base(u){
-    }
     void run(RSmessage &rs){
-        if (opcode2==0b000) logic::beq(rs1,rs2,imm,rs.pc,EX_to_rob_pc);
-        else if (opcode2==0b001) logic::bne(rs1,rs2,imm,rs.pc,EX_to_rob_pc);
-        else if (opcode2==0b100) logic::blt(rs1,rs2,imm,rs.pc,EX_to_rob_pc);
-        else if (opcode2==0b101) logic::bge(rs1,rs2,imm,rs.pc,EX_to_rob_pc);
-        else if (opcode2==0b110) logic::bltu(rs1,rs2,imm,rs.pc,EX_to_rob_pc);
-        else if (opcode2==0b111) logic::bgeu(rs1,rs2,imm,rs.pc,EX_to_rob_pc);
+        //std::cerr<<"Borigin"<<rs1<<" "<<rs2<<std::endl;
+        if (opcode2==0b000) logic::beq(rs.V1,rs.V2,imm,rs.pc,EX_to_rob_pc);
+        else if (opcode2==0b001) logic::bne(rs.V1,rs.V2,imm,rs.pc,EX_to_rob_pc);
+        else if (opcode2==0b100) logic::blt(rs.V1,rs.V2,imm,rs.pc,EX_to_rob_pc);
+        else if (opcode2==0b101) logic::bge(rs.V1,rs.V2,imm,rs.pc,EX_to_rob_pc);
+        else if (opcode2==0b110) logic::bltu(rs.V1,rs.V2,imm,rs.pc,EX_to_rob_pc);
+        else if (opcode2==0b111) logic::bgeu(rs.V1,rs.V2,imm,rs.pc,EX_to_rob_pc);
+        if (EX_to_rob_pc==UINT_MAX) EX_to_rob_pc=rs.pc;
     }
 };
 struct Scommand:command_base{
@@ -103,13 +99,11 @@ public:
             (getval(in,25,30)<<5)|
             extrabit(getval(in,31,31),11);
     }
-    Scommand(const command_base &u):command_base(u){
-    }
     void run(RSmessage &rs){
         SLB_to_rob=rs;
-        if (opcode2==0b000) logic::sb(rs1,rs2,imm,SLB_to_rob_d,SLB_to_rob_v);
-        else if (opcode2==0b001) logic::sh(rs1,rs2,imm,SLB_to_rob_d,SLB_to_rob_v);
-        else if (opcode2==0b010) logic::sw(rs1,rs2,imm,SLB_to_rob_d,SLB_to_rob_v);
+        if (opcode2==0b000) logic::sb(rs.V1,rs.V2,imm,SLB_to_rob_d,SLB_to_rob_v);
+        else if (opcode2==0b001) logic::sh(rs.V1,rs.V2,imm,SLB_to_rob_d,SLB_to_rob_v);
+        else if (opcode2==0b010) logic::sw(rs.V1,rs.V2,imm,SLB_to_rob_d,SLB_to_rob_v);
     }
 };
 struct Rcommand:command_base{
@@ -117,8 +111,6 @@ public:
     Rcommand(const UINT &in):command_base(in){
         //»¹ÊÇALUºÃ°¡£¡
         //std::cout<<"R"<<std::endl;
-    }
-    Rcommand(const command_base &u):command_base(u){
     }
     void run(RSmessage &rs){
         if (opcode2==0b000){

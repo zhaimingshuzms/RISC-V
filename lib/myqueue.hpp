@@ -15,6 +15,9 @@ public:
         tail=0;
         memset(c,0,sizeof(c));
     }
+    void clear(){//weak clear
+        head=tail=0;
+    }
     static UINT next(UINT x){
         return (x+1)%SIZE;
     }
@@ -29,7 +32,8 @@ public:
     }
     bool push(const T &x){
         if (full()) return false;
-        c[tail++]=x;
+        c[tail]=x;
+        tail=next(tail);
         return true;
     }
     T & front(){
@@ -37,7 +41,7 @@ public:
     }
     bool pop(){
         if (empty()) return false;
-        ++head;
+        head=next(head);
         return true;
     }
 };

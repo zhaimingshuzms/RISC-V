@@ -26,7 +26,7 @@ namespace logic{
         pc_j=pc_o+sext(offset);
     }
     void jalr(UINT &rs1,UINT &rd,UINT &offset,UINT &pc_o,UINT &pc_j){
-        //std::cout<<"jalr "<<std::dec<<rs1<<" "<<rd<<" "<<offset<<" "<<pc<<std::endl;
+        //std::cerr<<"jalr "<<rs1<<" "<<rd<<" "<<offset<<" "<<pc_o<<std::endl;
         auto t=pc_o+4;
         pc_j=(rs1+sext(offset))&(~1u);
         rd=t;
@@ -36,6 +36,7 @@ namespace logic{
         if (rs1==rs2) pc_j=pc_o+sext(offset);
     }
     void bne(UINT &rs1,UINT &rs2,UINT &offset,UINT pc_o,UINT &pc_j){
+        //std::cerr<<"bne excute"<<" "<<rs1<<" "<<rs2<<std::endl;
         if (rs1!=rs2) pc_j=pc_o+sext(offset);
     }
     void blt(UINT &rs1,UINT &rs2,UINT &offset,UINT &pc_o,UINT &pc_j){
@@ -54,6 +55,7 @@ namespace logic{
         rd=sext(M[rs1+sext(offset)]);
     }
     void lbu(UINT &rs1,UINT &rd,UINT &offset){
+        //std::cerr<<"lbu"<<" "<<rs1<<" "<<offset<<" "<<rs1+sext(offset)<<std::endl;
         rd=M[rs1+sext(offset)];
     }
     void lh(UINT &rs1,UINT &rd,UINT &offset){
@@ -63,7 +65,7 @@ namespace logic{
         rd=M.get2(rs1+sext(offset));
     }
     void lw(UINT &rs1,UINT &rd,UINT &offset){
-        //std::cout<<"lw"<<std::dec<<x[rs1]+sext(offset)<<std::endl;
+        //std::cerr<<"----------------lw"<<rs1+sext(offset)<<" "<<M.get4(rs1+sext(offset))<<std::endl;
         rd=sext(M.get4(rs1+sext(offset)));
     }
     void lwu(UINT &rs1,UINT &rd,UINT &offset){
@@ -78,12 +80,12 @@ namespace logic{
         v=(rs2&0xffffu);
     }
     void sw(UINT &rs1,UINT &rs2,UINT &offset,UINT &d,UINT &v){
-        //std::cout<<"sw"<<std::hex<<" "<<x[rs1]<<" "<<x[rs1]+sext(offset)<<" "<<x[rs2]<<" "<<offset<<std::endl;
+        //std::cerr<<"---------------------------sw"<<rs1<<" "<<offset<<" "<<rs1+sext(offset)<<std::endl;
         d=rs1+sext(offset);
         v=rs2;
     }
     void addi(UINT &rs1,UINT &rd,UINT &imm){
-        //std::cout<<"addi"<<rs1<<" "<<rd<<" "<<imm<<" "<<std::dec<<sext(imm)<<std::endl;
+        //std::cerr<<"----------------addi"<<rs1<<" "<<rd<<" "<<imm<<std::endl;
         rd=rs1+sext(imm);
     }
     void slti(UINT &rs1,UINT &rd,UINT &imm){

@@ -11,7 +11,7 @@ UINT code_from_rob_to_commit;
 command_base issue_to_rob(0);
 UINT issue_to_rob_pc;
 UINT EX_to_rob_v;
-UINT EX_to_rob_pc;
+UINT EX_to_rob_pc=UINT_MAX;
 RSmessage EX_to_rob;
 const UINT ROBSIZE=32;//can be modified
 class rob{
@@ -27,18 +27,18 @@ public:
     rob():head(0),tail(0){
     }
     void clear(){
-        head=tail=0;
-        memset(ready,0,sizeof(ready));
+        memset(this,0,sizeof(*this));
     }
     bool full(){
         return next(tail)==head;
     }
     void tick(){
-        for (auto i:in) i.tick();
-        for (auto i:ready) i.tick();
-        for (auto i:dest) i.tick();
-        for (auto i:value) i.tick();
-        for (auto i:pc) i.tick();
+        for (UINT i=0; i<ROBSIZE; ++i) in[i].tick();
+        for (UINT i=0; i<ROBSIZE; ++i) ready[i].tick();
+        for (UINT i=0; i<ROBSIZE; ++i) dest[i].tick();
+        for (UINT i=0; i<ROBSIZE; ++i) value[i].tick();
+        for (UINT i=0; i<ROBSIZE; ++i) pc[i].tick();
+        for (UINT i=0; i<ROBSIZE; ++i) pco[i].tick();
     }
 }ROB;
 #endif //RISC_V_ROB_H

@@ -10,6 +10,7 @@ public:
     enum type{
         U,J,I,B,S,R
     }t;
+    UINT origin_code;
     UINT opcode,opcode2,opcode3;
     UINT rd,rs1,rs2;
     UINT imm;
@@ -20,7 +21,7 @@ public:
     UINT extrabit(const UINT &u,const UINT lo){
         return u?0xffffffffu <<lo:0;
     }
-    command_base(const UINT &in=0){
+    command_base(const UINT &in=0):origin_code(in){
         imm=4294967295u;//care
         opcode=getval(in,0,6);
         opcode2=getval(in,12,14);

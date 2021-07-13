@@ -11,6 +11,9 @@ class memory{
 public:
     UINT pos;
     UCHAR pool[SIZE];
+    UCHAR tmp1;
+    USHORT tmp2;
+    UINT tmp3;
     memory():pos(0){
 
     }
@@ -21,12 +24,15 @@ public:
         pool[pos++]=val;
     }
     UCHAR & operator [](const UINT &_pos){
+        if (_pos>=SIZE) return tmp1;//load ÔÚ jump ºó£¬µØÖ·´íÎó
         return pool[_pos];
     }
     USHORT & get2(const UINT &_pos){
+        if (_pos>=SIZE) return tmp2;
         return *reinterpret_cast<USHORT*>(pool+_pos);
     }
     UINT &get4(const UINT &_pos){
+        if (_pos>=SIZE) return tmp3;
         return *reinterpret_cast<UINT*>(pool+_pos);
     }
     void print_all(){
