@@ -32,6 +32,9 @@ public:
     bool full(){
         return next(tail)==head;
     }
+    bool empty(){
+        return head==tail;
+    }
     void tick(){
         for (UINT i=0; i<ROBSIZE; ++i) in[i].tick();
         for (UINT i=0; i<ROBSIZE; ++i) ready[i].tick();

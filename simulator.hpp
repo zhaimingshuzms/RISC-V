@@ -21,16 +21,18 @@ RSmessage SLB_to_rob;
 bool RSfull;
 bool issuestall;
 void clear(){
-    std::cerr<<"-----------------------------clear"<<std::endl;
+    //std::cerr<<"-----------------------------clear"<<std::endl;
     issue_to_rob=0;
     issue_to_slb=0;
     issue_to_rs=0;
     issue_to_reg_d=ROBSIZE;
     if_to_issue=0;
     EX_to_rob.c=0;
+    EX_to_rob_pc=UINT_MAX;
     SLB_to_rob.c=0;
     issuestall=false;
     RSfull=false;
+    lacommit=true;
     q.Clear();
     for (UINT i=0; i<32; ++i) reg.Q(i)=ROBSIZE;
     for (UINT i=0; i<8; ++i) rs[i].clear();
@@ -44,6 +46,7 @@ void update(){
 }
 void get_rob_pos(){
     //std::cerr<<"Get rob pos"<<issue_to_rob.origin_code<<" "<<issue_to_rob_pc<<std::endl;
+    if (ROB.full()) assert(0);
     ROB.ready[ROB.tail]=false;//还没好
     ROB.in[ROB.tail]=issue_to_rob;
     ROB.pco[ROB.tail]=issue_to_rob_pc;
@@ -57,17 +60,16 @@ void get_rob_pos(){
 }
 void commit(){
     //pan kong
-    if (ROB.ready[ROB.head]) {
-        std::cerr<<"ROB commit"<<ROB.head<<" "<<ROB.pc[ROB.head]<<" "<<ROB.in[ROB.head].prev.origin_code<<" "<<
-        ROB.dest[ROB.head]<<" "<<ROB.value[ROB.head]<<std::endl;
+    if (!ROB.empty()&&ROB.ready[ROB.head]) {
+        //std::cerr<<"ROB commit"<<ROB.head<<" "<<ROB.pc[ROB.head]<<" "<<ROB.in[ROB.head].prev.origin_code<<" "<<ROB.dest[ROB.head]<<" "<<ROB.value[ROB.head]<<std::endl;
+        //if (ROB.pco[ROB.head]==0x11c4) exit(0);
         //???
         if (ROB.in[ROB.head].prev.t==command_base::S){
+            //std::cerr<<"commit save"<<ROB.dest[ROB.head]<<" "<<ROB.value[ROB.head]<<std::endl;
+            lacommit=true;
             if (ROB.in[ROB.head].prev.opcode2==0b000) M[ROB.dest[ROB.head]]=ROB.value[ROB.head];
             else if (ROB.in[ROB.head].prev.opcode2==0b001) M.get2(ROB.dest[ROB.head])=ROB.value[ROB.head];
-            else{
-                //std::cerr<<"SW"<<std::endl;
-                M.get4(ROB.dest[ROB.head])=ROB.value[ROB.head];
-            }
+            else M.get4(ROB.dest[ROB.head])=ROB.value[ROB.head];
         }
         if (ROB.in[ROB.head].prev.t == command_base::J || ROB.in[ROB.head].prev.t == command_base::B || ROB.in[ROB.head].prev.opcode == 0b1100111) {
             if (ROB.pc[ROB.head]!=ROB.pco[ROB.head]){
@@ -88,7 +90,10 @@ void commit(){
 }
 void run_rob(){
     //EX he slbuffer 改rob需要通過消息 commit 消息
-    if (issue_to_rob.opcode!=0) get_rob_pos();//rob 满
+    if (issue_to_rob.opcode!=0){
+        //std::cerr<<issue_to_rob.origin_code<<" "<<ROB.head<<" "<<ROB.tail<<std::endl;
+        get_rob_pos();//rob 满
+    }
     //EX
     //std::cerr<<"EX_to_rob"<<EX_to_rob.c.origin_code<<" "<<SLB_to_rob.c.origin_code<<" "<<issue_to_rob_pc<<std::endl;
     if (EX_to_rob.c.opcode&&EX_to_rob.c.t!=command_base::B){
@@ -178,16 +183,16 @@ void run_regfile(){
     }
 }
 void run_issue(){
-    std::cerr<<"if_to_issue"<<if_to_issue.origin_code<<" "<<if_to_issue_pc<<" "<<issuestall<<std::endl;
+    //std::cerr<<"if_to_issue"<<if_to_issue.origin_code<<" "<<ROB.head<<" "<<ROB.tail<<" "<<ROB.full()<<std::endl;
     if (if_to_issue.opcode==0) return;
-    if (ROB.full()){
+    /*if (ROB.full()){
         assert(0);
         return;//wei kao lv
-    }
+    }*/
     issue_to_rob=0;
     issue_to_slb=0;
     issue_to_rs=0;
-    if (if_to_issue.t!=command_base::B&&reg.Q(if_to_issue.rd)!=ROBSIZE){//maybe not 0 寄存器
+    if (if_to_issue.t!=command_base::B&&reg.Q(if_to_issue.rd)!=ROBSIZE||ROB.full()){//maybe not 0 寄存器
         //std::cerr<<"stall"<<if_to_issue.rd<<" "<<reg.Q(if_to_issue.rd)<<" "<<if_to_issue.origin_code<<std::endl;
         issuestall=true;
         return;
@@ -243,12 +248,12 @@ void run(){
     std::cerr<<std::hex;
     M.seek(0);
     int cycle=0;
-    int la=0;
+    //int la=0;
     while (true){
         ++cycle;
-        std::cerr<<"cycle : "<<cycle<<" begin"<<" pos : "<<M.pos<<" "<<std::endl;
-        if (reg[10]!=la) std::cerr<<"-------------change : "<<(UINT)reg[10]<<std::endl;
-        la=reg[10];
+        //std::cerr<<"cycle : "<<cycle<<" begin"<<" pos : "<<M.pos<<" "<<std::endl;
+        //if (reg[10]!=la) std::cerr<<"-------------change : "<<(UINT)reg[10]<<" "<<(UINT)M.get4(0x42503)<<std::endl;
+        //la=reg[10];
         run_rob();
         if (code_from_rob_to_commit==0x0ff00513){
             std::cout<<std::dec<<((UINT)reg[10]&255u);
@@ -269,7 +274,7 @@ void run(){
         //for (int i=1; i<=3; ++i)
         //    std::cerr<<std::endl;
         //if (cycle==170) break;
-        //if (reg[10]==2) break;
+        //if (reg[10]==0xfffffffe) break;
     }
 }
 
