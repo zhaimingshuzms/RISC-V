@@ -39,6 +39,7 @@ public:
         }
     }
     std::pair<command_base,UINT> get_command(){
+        std::cerr<<"QQQQQQQQQQQ"<<c[head].origin_code<<std::endl;
         auto ret=std::make_pair(c[head],pco[pco.head]);
         head=next(head);
         pco.head=pco.next(pco.head);

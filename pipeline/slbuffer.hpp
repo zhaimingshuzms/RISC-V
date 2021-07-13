@@ -49,7 +49,7 @@ class slbuffer{
 public:
     myqueue<slbufferunit,SLSIZE> q;
     void push(){
-        //std::cerr<<"------------------------SLB push"<<issue_to_slb.origin_code<<" "<<issue_to_slb.rs1<<" "<<issue_to_slb.rd<<" "<<reg.Q[issue_to_slb.rs2]<<" "<<reg[issue_to_slb.rs2]<<std::endl;
+        std::cerr<<"------------------------SLB push"<<issue_to_slb.origin_code<<" "<<issue_to_slb.rs1<<" "<<issue_to_slb.rd<<std::endl;
         if (issue_to_slb.t==command_base::S)
             q.push(slbufferunit(issue_to_slb,issue_to_slb_robid,reg.Q(issue_to_rob.rs1),reg.Q(issue_to_rob.rs2),reg[issue_to_rob.rs1],reg[issue_to_rob.rs2]));
         else
@@ -57,7 +57,7 @@ public:
     }
     void run(){
         if (!q.front().ready()) return;
-        //std::cerr<<"slbrun : "<<q.front().c.prev.origin_code<<" "<<q.front().V1<<" "<<q.front().V2<<std::endl;
+        std::cerr<<"slbrun : "<<q.front().c.prev.origin_code<<" "<<q.front().V1<<" "<<q.front().V2<<std::endl;
         RSmessage tmp(q.front().c,q.front().V1,q.front().V2,q.front().robid,0);//wrong
         if (q.front().c.prev.opcode==0b0000011){
             Icommand(q.front().c.prev.origin_code).run(tmp);

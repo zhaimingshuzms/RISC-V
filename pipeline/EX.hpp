@@ -8,7 +8,7 @@
 #include "../command.hpp"
 extern RSmessage EX_to_rob;
 void init_run_ex(RSmessage rs){
-    std::cerr<<"EX"<<rs.c.origin_code<<std::endl;
+    //std::cerr<<"EX"<<rs.c.origin_code<<std::endl;
     EX_to_rob = rs;
     EX_to_rob_pc = UINT_MAX;
     if (rs.c.t == command_base::U) Ucommand(rs.c.origin_code).run(rs);

@@ -21,13 +21,16 @@ RSmessage SLB_to_rob;
 bool RSfull;
 bool issuestall;
 void clear(){
-    //std::cerr<<"-----------------------------clear"<<std::endl;
+    std::cerr<<"-----------------------------clear"<<std::endl;
     issue_to_rob=0;
     issue_to_slb=0;
     issue_to_rs=0;
     issue_to_reg_d=ROBSIZE;
+    if_to_issue=0;
     EX_to_rob.c=0;
     SLB_to_rob.c=0;
+    issuestall=false;
+    RSfull=false;
     q.Clear();
     for (UINT i=0; i<32; ++i) reg.Q(i)=ROBSIZE;
     for (UINT i=0; i<8; ++i) rs[i].clear();
@@ -76,7 +79,7 @@ void commit(){
             commitmessage_robid=ROB.head;
             commitmessage_d = ROB.dest[ROB.head];
             commitmessage_v = ROB.value[ROB.head];
-            std::cerr<<"--------commitmessage"<<ROB.dest[ROB.head]<<" "<<ROB.value[ROB.head]<<std::endl;
+            //std::cerr<<"--------commitmessage"<<ROB.dest[ROB.head]<<" "<<ROB.value[ROB.head]<<std::endl;
         }
         //reg[ROB.dest[ROB.head]] = ROB.value[ROB.head];// a lot bug
         code_from_rob_to_commit=ROB.in[ROB.head].prev.origin_code;
@@ -162,7 +165,7 @@ void run_ex(){
     //ex 没东西
 }
 void run_regfile(){
-    std::cerr<<"RUN regfile"<<commitmessage_d<<" "<<commitmessage_v<<" "<<issue_to_reg_d<<" "<<issue_to_reg_v<<std::endl;
+    //std::cerr<<"RUN regfile"<<commitmessage_d<<" "<<commitmessage_v<<" "<<issue_to_reg_d<<" "<<issue_to_reg_v<<std::endl;
     if (commitmessage_d!=32) {
         //std::cerr<<"regfile-------------"<<reg.Q[commitmessage_d]<<std::endl;
         if (commitmessage_robid==reg.Q(commitmessage_d)) reg.Q(commitmessage_d) = ROBSIZE;//最后一次
@@ -185,7 +188,7 @@ void run_issue(){
     issue_to_slb=0;
     issue_to_rs=0;
     if (if_to_issue.t!=command_base::B&&reg.Q(if_to_issue.rd)!=ROBSIZE){//maybe not 0 寄存器
-        std::cerr<<"stall"<<if_to_issue.rd<<" "<<reg.Q(if_to_issue.rd)<<" "<<if_to_issue.origin_code<<std::endl;
+        //std::cerr<<"stall"<<if_to_issue.rd<<" "<<reg.Q(if_to_issue.rd)<<" "<<if_to_issue.origin_code<<std::endl;
         issuestall=true;
         return;
     }
@@ -200,14 +203,14 @@ void run_issue(){
         issue_to_slb_robid=ROB.tail;
         issue_to_rob=if_to_issue;
         issue_to_rob_pc=if_to_issue_pc;
-        std::cerr<<"issue_to_reg_v"<<issue_to_reg_v<<" "<<issue_to_reg_d<<std::endl;
+        //std::cerr<<"issue_to_reg_v"<<issue_to_reg_v<<" "<<issue_to_reg_d<<std::endl;
         return;
     }
     if (if_to_issue.t!=command_base::B) {
         issue_to_reg_d = if_to_issue.rd;
         issue_to_reg_v = ROB.tail;
     }
-    std::cerr<<"issue_to_reg_v"<<issue_to_reg_v<<" "<<issue_to_reg_d<<std::endl;
+    //std::cerr<<"issue_to_reg_v"<<issue_to_reg_v<<" "<<issue_to_reg_d<<std::endl;
     issue_to_rob=if_to_issue;
     issue_to_rob_pc=if_to_issue_pc;
     issue_to_rs=if_to_issue;
@@ -244,8 +247,8 @@ void run(){
     while (true){
         ++cycle;
         std::cerr<<"cycle : "<<cycle<<" begin"<<" pos : "<<M.pos<<" "<<std::endl;
-        //if (M[0x11b4]!=la) std::cerr<<"-------------change : "<<(UINT)M[0x11b4]<<std::endl;
-        //la=M[0x11b4];
+        if (reg[10]!=la) std::cerr<<"-------------change : "<<(UINT)reg[10]<<std::endl;
+        la=reg[10];
         run_rob();
         if (code_from_rob_to_commit==0x0ff00513){
             std::cout<<std::dec<<((UINT)reg[10]&255u);
@@ -259,14 +262,14 @@ void run(){
         run_inst_fetch_queue();
 
         update();
-        std::cerr<<"rob ready"<<ROB.ready[5]<<std::endl;
+        //std::cerr<<"rob ready"<<ROB.ready[5]<<std::endl;
         run_ex();
         run_issue();
         run_commit();//commit bu neng zhi jie gei ,yao fa gei run_regfile gai
         //for (int i=1; i<=3; ++i)
         //    std::cerr<<std::endl;
-        if (cycle==1000) break;
-        //if (reg[10]==3) break;
+        //if (cycle==170) break;
+        //if (reg[10]==2) break;
     }
 }
 

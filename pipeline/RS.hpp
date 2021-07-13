@@ -44,14 +44,14 @@ public:
             Q2=ROBSIZE;
         }
         //0 ¼Ä´æÆ÷µÄÎÊÌâ
-        if (Q1.next<ROBSIZE&&_c.rs1==0){
+        /*if (Q1.next<ROBSIZE&&_c.rs1==0){
             Q1=ROBSIZE;
             V1=0;
         }
         if (Q2.next<ROBSIZE&&_c.rs2==0){
             Q2=ROBSIZE;
             V2=0;
-        }
+        }*/
         if (Q1.next==ROBSIZE||ROB.ready[Q1.next]) V1=reg[_c.rs1]; else V1=UINT_MAX;
         if (Q2.next==ROBSIZE||ROB.ready[Q2.next]) V2=reg[_c.rs2]; else V2=UINT_MAX;
         //std::cerr<<"init push end"<<Q1.next<<" "<<V1.next<<std::endl;
